@@ -1,0 +1,74 @@
+name: iOS build (Spedizioni)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - "Sources/**"
+      - "Resources/**"
+      - "project.yml"
+      - ".github/workflows/ios-build.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Liquid Glass (iOS 26)
+    runs-on: macos-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode 26
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build (unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project Spedizioni.xcodeproj \
+            -scheme Spedizioni \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            clean build 2>&1 | tail -n 80
+
+      - name: Package unsigned IPA
+        run: |
+          set -euo pipefail
+          mkdir -p out/Payload
+          cp -R "build/Build/Products/Release-iphoneos/Spedizioni.app" "out/Payload/"
+          cd out
+          ditto -c -k --keepParent Payload "Spedizioni-unsigned.ipa"
+          echo "IPA: $(stat -f%z Spedizioni-unsigned.ipa) bytes"
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: |
+            build/Logs
+            **/*.xcresult
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Spedizioni-unsigned-ipa
+          path: out/Spedizioni-unsigned.ipa
+          retention-days: 14
