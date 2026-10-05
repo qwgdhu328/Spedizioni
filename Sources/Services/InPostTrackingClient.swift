@@ -73,8 +73,8 @@ enum InPostTrackingClient {
             throw TrackingError.http(http.statusCode)
         }
 
-        guard let json = try? JSONSerialization.jsonObject(with: data)
-                .flatMap({ $0 as? [String: Any] }),
+        guard let object = try? JSONSerialization.jsonObject(with: data),
+              let json = object as? [String: Any],
               let token = json["access_token"] as? String
         else {
             throw TrackingError.decoding("token OAuth non leggibile")
