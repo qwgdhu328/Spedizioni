@@ -21,7 +21,7 @@ enum CarrierCatalog {
 
     /// Ricerca per nome, paese o id.
     static func search(_ query: String) -> [Carrier] {
-        let q = query.trimmingCharacters(in: .whitespacesAndLocalizedCaseInsensibles).lowercased()
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard !q.isEmpty else { return all }
         return all.filter {
             $0.name.lowercased().contains(q)
