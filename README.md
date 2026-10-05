@@ -16,9 +16,17 @@ nativo di iOS 26.
   lente per rete.
 - **Tab Impostazioni**: conteggi, cancellazione dati, info.
 - **Dettaglio**: stato segmentato (in attesa / in transito /
-  consegnato / problema), etichetta, note, **Traccia su {rete}**
-  (pagina ufficiale nel Safari integrato) e **17Track universale**
-  come fallback per qualsiasi corriere non elencato.
+  consegnato / problema), etichetta, note e **tracciamento
+  in-app**: la vista Tracciamento interroga l'**API pubblica
+  Cainiao (keyless, `global.cainiao.com`, risposte in
+  italiano)**, mostra **ogni movimento in dettaglio** (timeline
+  completa con data, titolo, descrizione e codice),
+  avanzamento con tappe e **auto-refresh ogni 60 secondi**.
+- **GPS veicolo**: mappa live del corriere aperta **dentro
+  l'app** (WKWebView): quando il corriere espone la posizione
+  GPS del veicolo, la mappa appare senza uscire dall'app; se
+  l'API fornisce coordinate degli eventi, vengono mostrate con
+  marker su mappa nativa (MapKit).
 
 ## Liquid Glass (iOS 26)
 
@@ -49,7 +57,9 @@ Spedizioni/
         ├── AddShipmentView.swift  # nuovo pacco (picker rete)
         ├── CarrierPickerView.swift# tutte le reti, cercabili
         ├── CarriersView.swift     # tab Reti con tracciamento rapido
-        ├── ShipmentDetailView.swift # stato + tracciamento glass
+        ├── ShipmentDetailView.swift # stato + tracciamento in-app
+        ├── TrackingView.swift      # timeline movimenti + GPS/API
+        ├── WebView.swift           # WKWebView (mappa live corriere)
         ├── SettingsView.swift     # impostazioni
         └── SafariView.swift       # SFSafariViewController
 ```

@@ -4,7 +4,7 @@ import SwiftUI
 /// con ricerca e tracciamento rapido di un numero.
 struct CarriersView: View {
     @State private var searchText = ""
-    @State private var safariURL: URL?
+    @State private var tracking: TrackRequest?
     @State private var trackedNumber: [String: String] = [:]
 
     private var groups: [(country: String, carriers: [Carrier])] {
@@ -28,11 +28,16 @@ struct CarriersView: View {
             }
             .navigationTitle("Reti")
             .searchable(text: $searchText, prompt: "Cerca rete o paese…")
-            .sheet(item: Binding(
-                get: { safariURL.map { IdentifiedURL(url: $0) } },
-                set: { safariURL = $0?.url }
-            )) { item in
-                SafariView(url: item.url)
+            .sheet(item: $tracking) { request in
+                NavigationStack {
+                    TrackingView(number: request.number, carrier: request.carrier)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Chiudi") { tracking = nil }
+                                    .buttonStyle(.glass)
+                            }
+                        }
+                }
             }
         }
     }
@@ -84,14 +89,15 @@ struct CarriersView: View {
         let number = (trackedNumber[carrier.id] ?? "")
             .trimmingCharacters(in: .whitespaces)
         guard !number.isEmpty else { return }
-        safariURL = carrier.trackingURL(for: number)
+        tracking = TrackRequest(number: number, carrier: carrier)
     }
 }
 
-/// Wrapper per usare URL in `.sheet(item:)`.
-private struct IdentifiedURL: Identifiable {
-    let url: URL
-    var id: String { url.absoluteString }
+/// Richiesta di tracciamento rapido dalla tab Reti.
+private struct TrackRequest: Identifiable {
+    let number: String
+    let carrier: Carrier
+    var id: String { "\(carrier.id)-\(number)" }
 }
 
 #Preview {

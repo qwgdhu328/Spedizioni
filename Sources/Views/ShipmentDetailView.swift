@@ -1,13 +1,12 @@
 import SwiftUI
 
-/// Dettaglio spedizione: stato, tracciamento su vetro
-/// (rete + 17Track universale) e note.
+/// Dettaglio spedizione: stato, tracciamento IN-APP
+/// (API + mappa live) e note.
 struct ShipmentDetailView: View {
     @EnvironmentObject private var store: ShipmentStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var shipment: Shipment
-    @State private var safariURL: URL?
     @State private var showDeleteConfirm = false
 
     init(shipment: Shipment) {
@@ -45,38 +44,23 @@ struct ShipmentDetailView: View {
                 .padding(.vertical, 4)
             }
 
-            // ── Azioni glass ──
+            // ── Tracciamento in-app ──
             Section {
                 GlassEffectContainer(spacing: 12) {
-                    VStack(spacing: 10) {
-                        Button {
-                            if let carrier,
-                               let url = carrier.trackingURL(for: shipment.trackingNumber) {
-                                safariURL = url
-                            } else if let url = Carrier.universalTrackingURL(for: shipment.trackingNumber) {
-                                safariURL = url
-                            }
-                        } label: {
-                        Label(
-                            carrier.map { "Traccia su \($0.name)" } ?? "Traccia spedizione",
-                            systemImage: "magnifyingglass"
+                    NavigationLink {
+                        TrackingView(
+                            number: shipment.trackingNumber,
+                            carrier: carrier
                         )
-                            .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.glassProminent)
-                        .controlSize(.large)
-
-                        Button {
-                            if let url = Carrier.universalTrackingURL(for: shipment.trackingNumber) {
-                                safariURL = url
-                            }
-                        } label: {
-                            Label("17Track (universale)", systemImage: "globe")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.glass)
-                        .controlSize(.large)
+                    } label: {
+                        Label(
+                            "Traccia in-app — ogni movimento in dettaglio",
+                            systemImage: "dot.radiowaves.left.and.right"
+                        )
+                        .frame(maxWidth: .infinity)
                     }
+                    .buttonStyle(.glassProminent)
+                    .controlSize(.large)
                     .padding(.vertical, 6)
                 }
                 .listRowBackground(Color.clear)
@@ -125,12 +109,6 @@ struct ShipmentDetailView: View {
         }
         .navigationTitle(carrier?.name ?? "Spedizione")
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(item: Binding(
-            get: { safariURL.map { IdentifiedURL(url: $0) } },
-            set: { safariURL = $0?.url }
-        )) { item in
-            SafariView(url: item.url)
-        }
         .confirmationDialog(
             "Eliminare questa spedizione?",
             isPresented: $showDeleteConfirm,
@@ -143,12 +121,6 @@ struct ShipmentDetailView: View {
             Button("Annulla", role: .cancel) {}
         }
     }
-}
-
-/// Wrapper per usare URL in `.sheet(item:)`.
-private struct IdentifiedURL: Identifiable {
-    let url: URL
-    var id: String { url.absoluteString }
 }
 
 #Preview {
