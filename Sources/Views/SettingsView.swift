@@ -5,6 +5,9 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject private var store: ShipmentStore
     @State private var showDeleteAll = false
+    @State private var inpostClientID = ""
+    @State private var inpostClientSecret = ""
+    @State private var inpostSaved = false
 
     var body: some View {
         NavigationStack {
@@ -20,6 +23,51 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.glass)
                     .disabled(store.shipments.isEmpty)
+                }
+
+                Section("API InPost (ufficiale)") {
+                    LabeledContent(
+                        "Credenziali OAuth",
+                        value: inpostSaved ? "Salvate nel Keychain ✓" : "Non configurate"
+                    )
+                    TextField("Client ID", text: $inpostClientID)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    SecureField("Client Secret", text: $inpostClientSecret)
+                    HStack {
+                        Button("Salva credenziali") {
+                            KeychainStore.save(
+                                clientID: inpostClientID.trimmingCharacters(in: .whitespaces),
+                                clientSecret: inpostClientSecret.trimmingCharacters(in: .whitespaces)
+                            )
+                            inpostClientSecret = ""
+                            inpostSaved = KeychainStore.hasCredentials
+                        }
+                        .disabled(
+                            inpostClientID.trimmingCharacters(in: .whitespaces).isEmpty
+                                || inpostClientSecret.isEmpty
+                        )
+                        .buttonStyle(.glassProminent)
+
+                        if inpostSaved {
+                            Button("Rimuovi", role: .destructive) {
+                                KeychainStore.delete()
+                                inpostClientID = ""
+                                inpostClientSecret = ""
+                                inpostSaved = false
+                            }
+                            .buttonStyle(.glass)
+                        }
+                    }
+                    Text("""
+                    Client OAuth 2.1 con scope api:tracking:read \
+                    (developers.inpost-group.com: team InPost o \
+                    merchant.inpost-group.com). Con esse le spedizioni \
+                    InPost usano l'API ufficiale con tutti i 114 \
+                    eventi catalogati; senza, si usa il provider generico.
+                    """)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
                 }
 
                 Section("Info") {
@@ -42,6 +90,12 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Impostazioni")
+            .task {
+                if let creds = KeychainStore.credentials() {
+                    inpostClientID = creds.clientID
+                    inpostSaved = true
+                }
+            }
             .confirmationDialog(
                 "Eliminare tutte le spedizioni?",
                 isPresented: $showDeleteAll,

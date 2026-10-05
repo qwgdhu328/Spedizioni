@@ -41,8 +41,8 @@ struct TrackingResult: Hashable {
     let destCountry: String?
     /// Movimenti ordinati dal più recente.
     let events: [TrackingEvent]
-    /// Fonte dati mostrata in UI.
-    let source: String
+    /// Fonte dati mostrata in UI (può essere annotata in fallback).
+    var source: String
 
     /// Colore dello stato per la chip di riepilogo.
     var statusColor: Color {
@@ -70,6 +70,7 @@ enum TrackingError: LocalizedError {
     case http(Int)
     case emptyResponse
     case decoding(String)
+    case config(String)
 
     var errorDescription: String? {
         switch self {
@@ -83,6 +84,8 @@ enum TrackingError: LocalizedError {
             return "L'API non ha restituito dati per questo numero."
         case let .decoding(msg):
             return "Risposta dell'API non interpretabile: \(msg)"
+        case let .config(msg):
+            return msg
         }
     }
 }

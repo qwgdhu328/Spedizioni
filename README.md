@@ -27,6 +27,13 @@ nativo di iOS 26.
   GPS del veicolo, la mappa appare senza uscire dall'app; se
   l'API fornisce coordinate degli eventi, vengono mostrate con
   marker su mappa nativa (MapKit).
+- **API InPost ufficiale** (`developers.inpost-group.com`):
+  OAuth 2.1 client credentials (scope `api:tracking:read`,
+  credenziali nel Keychain) + `GET /tracking/v1/parcels`, con
+  catalogo ufficiale integrato dei **114 eventi** (codice →
+  titolo + descrizione). Le spedizioni InPost con credenziali
+  configurate usano l'API ufficiale; in assenza o in errore si
+  ripiega su Cainiao annotando la fonte.
 
 ## Liquid Glass (iOS 26)
 
@@ -50,7 +57,11 @@ Spedizioni/
     │   └── Shipment.swift         # spedizione + stato
     ├── Services/
     │   ├── CarrierCatalog.swift   # catalogo completo reti
-    │   └── ShipmentStore.swift    # CRUD + persistenza JSON locale
+    │   ├── ShipmentStore.swift    # CRUD + persistenza JSON locale
+    │   ├── TrackingService.swift  # routing provider (InPost/Cainiao)
+    │   ├── InPostTrackingClient.swift # API ufficiale InPost OAuth2.1
+    │   ├── InPostEventCatalog.swift   # 114 eventi ufficiali
+    │   └── KeychainStore.swift    # credenziali OAuth in Keychain
     └── Views/
         ├── ContentView.swift      # tab bar Liquid Glass
         ├── ShipmentListView.swift # lista + riepilogo vetro

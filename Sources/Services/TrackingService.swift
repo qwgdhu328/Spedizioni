@@ -49,10 +49,49 @@ enum TrackingService {
     }
 
     /// Traccia un numero e restituisce tutti i movimenti.
+    ///
+    /// Se la rete è **InPost** e le credenziali OAuth sono
+    /// configurate (Impostazioni), usa l'**API ufficiale InPost**;
+    /// in ogni altro caso (o in caso di errore) usa Cainiao.
     /// - Parameters:
     ///   - number: numero di tracciamento.
     ///   - source: nome del corriere (solo per etichette UI).
-    static func track(number: String, source: String? = nil) async throws -> TrackingResult {
+    ///   - carrier: rete selezionata (guida il routing InPost).
+    static func track(
+        number: String,
+        source: String? = nil,
+        carrier: Carrier? = nil
+    ) async throws -> TrackingResult {
+        if let carrier, carrier.id.hasPrefix("inpost") {
+            if let creds = KeychainStore.credentials() {
+                do {
+                    return try await InPostTrackingClient.track(
+                        number: number,
+                        clientID: creds.clientID,
+                        clientSecret: creds.clientSecret
+                    )
+                } catch {
+                    var fallback = try await trackCainiao(
+                        number: number,
+                        source: source
+                    )
+                    fallback.source +=
+                        " · InPost API non riuscita (\(error.localizedDescription))"
+                    return fallback
+                }
+            }
+            var fallback = try await trackCainiao(number: number, source: source)
+            fallback.source +=
+                " · configura l'API InPost in Impostazioni per il dettaglio ufficiale"
+            return fallback
+        }
+        return try await trackCainiao(number: number, source: source)
+    }
+
+    private static func trackCainiao(
+        number: String,
+        source: String? = nil
+    ) async throws -> TrackingResult {
         let clean = number.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !clean.isEmpty,
               var components = URLComponents(string: "https://global.cainiao.com/global/detail.json")

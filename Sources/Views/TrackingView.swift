@@ -269,7 +269,8 @@ struct TrackingView: View {
         do {
             result = try await TrackingService.track(
                 number: number,
-                source: carrier?.name
+                source: carrier?.name,
+                carrier: carrier
             )
             errorMessage = nil
         } catch {
