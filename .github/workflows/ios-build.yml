@@ -11,7 +11,7 @@ on:
       - ".github/workflows/ios-build.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -37,6 +37,7 @@ jobs:
       - name: Build (unsigned)
         run: |
           set -o pipefail
+          mkdir -p build
           xcodebuild \
             -project CreaSito.xcodeproj \
             -scheme CreaSito \
@@ -44,7 +45,23 @@ jobs:
             -destination 'generic/platform=iOS' \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
-            clean build 2>&1 | tail -n 80
+            clean build 2>&1 | tee build/build-output.log | tail -n 80
+
+      - name: Publish build errors in repo (readable without auth)
+        if: failure()
+        run: |
+          {
+            echo "### Errore build CI — run ${{ github.run_id }}, sha ${{ github.sha }}"
+            echo
+            echo '```'
+            grep -E "error:|fatal error:" build/build-output.log | head -80 || echo "Nessuna riga 'error:' trovata nel log"
+            echo '```'
+          } > build-errors.log || true
+          git config user.name "ci-bot"
+          git config user.email "ci-bot@users.noreply.github.com"
+          git add build-errors.log
+          git commit -m "CI: errori di build (${{ github.sha }})" || echo "nessun log da committare"
+          git push || echo "push log non riuscito"
 
       - name: Package unsigned IPA
         run: |

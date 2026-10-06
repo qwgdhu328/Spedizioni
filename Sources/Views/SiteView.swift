@@ -132,11 +132,11 @@ struct SiteView: View {
     }
 
     private var alertTitle: String {
-        switch alert {
+        guard let current = alert else { return "" }
+        switch current {
         case .create: return newIsFile ? "Nuovo file" : "Nuova cartella"
         case .rename: return "Rinomina"
         case .error: return "Errore"
-        case nil: return ""
         }
     }
 

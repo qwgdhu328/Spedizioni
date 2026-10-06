@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// Un elemento dell'albero del sito: cartella o file.
 struct SiteItem: Identifiable, Hashable {
@@ -218,12 +219,16 @@ final class SiteStore: ObservableObject {
 
     /// Tutti i file del sito come `(percorso relativo, contenuto)`.
     func collectFiles() -> [(path: String, data: Data)] {
-        var out: [(String, Data)] = []
+        var out: [(path: String, data: Data)] = []
         collect(root, prefix: "", into: &out)
         return out
     }
 
-    private func collect(_ dir: URL, prefix: String, into out: inout [(String, Data)]) {
+    private func collect(
+        _ dir: URL,
+        prefix: String,
+        into out: inout [(path: String, data: Data)]
+    ) {
         guard let names = try? fm.contentsOfDirectory(atPath: dir.path) else { return }
         for name in names where !name.hasPrefix(".") {
             let url = dir.appendingPathComponent(name)
@@ -233,7 +238,7 @@ final class SiteStore: ObservableObject {
             if isDir.boolValue {
                 collect(url, prefix: rel, into: &out)
             } else if let data = try? Data(contentsOf: url) {
-                out.append((rel, data))
+                out.append((path: rel, data: data))
             }
         }
     }
