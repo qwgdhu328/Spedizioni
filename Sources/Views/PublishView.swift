@@ -14,7 +14,7 @@ struct PublishView: View {
 
     private var fileCount: Int { store.collectFiles().count }
     private var previewHost: String {
-        "(VercelClient.sanitize(siteName)).vercel.app"
+        "\(VercelClient.sanitize(siteName)).vercel.app"
     }
 
     var body: some View {
@@ -33,13 +33,12 @@ struct PublishView: View {
 
                 Section {
                     LabeledContent("File", value: "\(fileCount)")
-                    LabeledContent(
-                        "Token",
-                        value: VercelKeychain.hasToken ? "attivo" : "mancante"
-                    )
-                    .foregroundStyle(
-                        VercelKeychain.hasToken ? .secondary : .red
-                    )
+                    if VercelKeychain.hasToken {
+                        LabeledContent("Token", value: "attivo")
+                    } else {
+                        LabeledContent("Token", value: "mancante")
+                            .foregroundStyle(.red)
+                    }
                 } header: {
                     Text("Prima di pubblicare")
                 } footer: {

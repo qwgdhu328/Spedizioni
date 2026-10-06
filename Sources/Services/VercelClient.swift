@@ -107,17 +107,15 @@ enum VercelClient {
         if let state = json["readyState"] as? String, state == "READY" {
             return finalURL(json: json)
         }
-        return try await poll(id: id, token: token, json: json)
+        return try await poll(id: id, token: token)
     }
 
     // MARK: - Polling stato
 
     private static func poll(
         id: String,
-        token: String,
-        json initial: [String: Any]
+        token: String
     ) async throws -> URL {
-        var current = initial
         for _ in 0..<18 {                       // 18 × 5s = 90s max
             try await Task.sleep(nanoseconds: 5_000_000_000)
 
@@ -135,7 +133,6 @@ enum VercelClient {
             guard let json = try? JSONSerialization.jsonObject(with: data)
                     as? [String: Any]
             else { throw VercelError.decoding("stato non JSON") }
-            current = json
 
             switch json["readyState"] as? String {
             case "READY":

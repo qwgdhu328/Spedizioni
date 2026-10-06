@@ -74,7 +74,7 @@ final class SiteStore: ObservableObject {
     private func bootstrap() {
         do {
             try fm.createDirectory(at: root, withIntermediateDirectories: true)
-            guard !fm.contentsOfDirectory(atPath: root.path).isEmpty else {
+            guard !(try fm.contentsOfDirectory(atPath: root.path)).isEmpty else {
                 try createInitialTemplate()
             }
         } catch {
@@ -201,7 +201,7 @@ final class SiteStore: ObservableObject {
 
     /// Apre un file nell'editor.
     func openEditor(_ path: String) {
-        guard let text = String(contentsOf: absolute(path), encoding: .utf8) else { return }
+        guard let text = try? String(contentsOf: absolute(path), encoding: .utf8) else { return }
         openFile = OpenFile(path: path, text: text)
     }
 
