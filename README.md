@@ -1,78 +1,57 @@
-# Spedizioni 📦
+# CreaSito 🌐
 
-App iOS nativa (SwiftUI) per **controllare le spedizioni**, con
-**tutte le reti di spedizione** incluse e design **Liquid Glass**
-nativo di iOS 26.
+App iOS nativa (SwiftUI, **Liquid Glass** iOS 26) per **creare un sito
+con cartelle e codice** e **pubblicarlo online gratis** con dominio
+incluso: l'app costruisce il sito da sola e lo mette online su
+`https://<nome>.vercel.app`.
 
-## Funzioni
+## Come funziona
 
-- **Tab Spedizioni**: riepilogo su vetro (totali / in transito /
-  consegati), lista con ricerca, tocca per aprire il dettaglio,
-  `+` glass per aggiungerne una nuova.
-- **Tab Reti**: catalogo completo (**60+ reti**: Poste Italiane,
-  BRT, GLS, DPD, DHL, UPS, FedEx, USPS, Royal Mail, Colissimo,
-  China Post, Yamato, Aramex, Australia Post, 17Track…) con
-  ricerca per nome/paese e **tracciamento rapido** campo numero +
-  lente per rete.
-- **Tab Impostazioni**: conteggi, cancellazione dati, info.
-- **Dettaglio**: stato segmentato (in attesa / in transito /
-  consegnato / problema), etichetta, note e **tracciamento
-  in-app**: la vista Tracciamento interroga l'**API pubblica
-  Cainiao (keyless, `global.cainiao.com`, risposte in
-  italiano)**, mostra **ogni movimento in dettaglio** (timeline
-  completa con data, titolo, descrizione e codice),
-  avanzamento con tappe e **auto-refresh ogni 60 secondi**.
-- **GPS veicolo**: mappa live del corriere aperta **dentro
-  l'app** (WKWebView): quando il corriere espone la posizione
-  GPS del veicolo, la mappa appare senza uscire dall'app; se
-  l'API fornisce coordinate degli eventi, vengono mostrate con
-  marker su mappa nativa (MapKit).
-- **API InPost ufficiale** (`developers.inpost-group.com`):
-  OAuth 2.1 client credentials (scope `api:tracking:read`,
-  credenziali nel Keychain) + `GET /tracking/v1/parcels`, con
-  catalogo ufficiale integrato dei **114 eventi** (codice →
-  titolo + descrizione). Le spedizioni InPost con credenziali
-  configurate usano l'API ufficiale; in assenza o in errore si
-  ripiega su Cainiao annotando la fonte.
+1. **Tab Sito** — alberatura di cartelle e file del sito:
+   crea cartelle e file HTML/CSS/JS con `+`, tocca un file per
+   aprirlo nell'**editor di codice** (monospazio, salvataggio
+   automatico), swipe per rinominare o eliminare.
+   Alla prima avvio l'app **crea in automatico** un sito completo
+   (`index.html`, `css/stile.css`, `js/script.js`) già pubblicabile.
+2. **Tab Impostazioni** — incolla il tuo **Access Token Vercel**
+   (creato gratis su [vercel.com/account/tokens](https://vercel.com/account/tokens));
+   viene salvato solo nel **Keychain** del dispositivo.
+3. **Tab Pubblica** — scegli il nome del sito e tocca
+   **Pubblica online**: l'app invia tutti i file all'API Vercel
+   (`POST /v13/deployments`, file in linea base64, static site con
+   nessun build), attende lo stato `READY` e ti dà il link
+   `https://<nome>.vercel.app` (**dominio gratis**, piano Hobby)
+   condivisibile con `ShareLink`.
 
-## Liquid Glass (iOS 26)
+## Stack
 
-- `TabView` con `Tab` (stile vetro automatico) e
-  `tabBarMinimizeBehavior`
-- `buttonStyle(.glass)` / `.glassProminent` su tutte le azioni
-- `GlassEffectContainer` + `glassEffect(_:in:)` per il riepilogo
-  e le azioni del dettaglio
-- `.searchable` nativo nelle barre vetro delle toolbar
+- **SwiftUI / iOS 26** con `Tab` Liquid Glass, `buttonStyle(.glass)` e
+  `GlassEffectContainer`.
+- **XcodeGen** (`project.yml`), build CI su **GitHub Actions**
+  (macOS + Xcode 26, IPA unsigned come artifact).
+- **Vercel REST API v13** per il deploy; nessun server proprio:
+  il sito vive su Vercel, i file restano sul dispositivo finché
+  non pubblichi.
 
 ## Struttura
 
 ```
 Spedizioni/
-├── project.yml                    # XcodeGen, iOS 26.0
+├── project.yml                     # XcodeGen → CreaSito, iOS 26.0
 ├── Resources/Info.plist
+├── .github/workflows/ios-build.yml # build + IPA unsigned
 └── Sources/
-    ├── App/SpedizioniApp.swift    # entry point
-    ├── Models/
-    │   ├── Carrier.swift          # rete + categoria (icona/colore)
-    │   └── Shipment.swift         # spedizione + stato
+    ├── App/CreaSitoApp.swift       # entry point
     ├── Services/
-    │   ├── CarrierCatalog.swift   # catalogo completo reti
-    │   ├── ShipmentStore.swift    # CRUD + persistenza JSON locale
-    │   ├── TrackingService.swift  # routing provider (InPost/Cainiao)
-    │   ├── InPostTrackingClient.swift # API ufficiale InPost OAuth2.1
-    │   ├── InPostEventCatalog.swift   # 114 eventi ufficiali
-    │   └── KeychainStore.swift    # credenziali OAuth in Keychain
+    │   ├── SiteStore.swift         # alberatura file + template iniziale
+    │   ├── VercelClient.swift      # deploy API + polling READY
+    │   └── VercelKeychain.swift    # token nel Keychain
     └── Views/
-        ├── ContentView.swift      # tab bar Liquid Glass
-        ├── ShipmentListView.swift # lista + riepilogo vetro
-        ├── AddShipmentView.swift  # nuovo pacco (picker rete)
-        ├── CarrierPickerView.swift# tutte le reti, cercabili
-        ├── CarriersView.swift     # tab Reti con tracciamento rapido
-        ├── ShipmentDetailView.swift # stato + tracciamento in-app
-        ├── TrackingView.swift      # timeline movimenti + GPS/API
-        ├── WebView.swift           # WKWebView (mappa live corriere)
-        ├── SettingsView.swift     # impostazioni
-        └── SafariView.swift       # SFSafariViewController
+        ├── ContentView.swift       # tab bar Liquid Glass
+        ├── SiteView.swift          # cartelle e file del sito
+        ├── EditorView.swift        # editor di codice
+        ├── PublishView.swift       # pubblica online (deploy)
+        └── SettingsView.swift      # token Vercel
 ```
 
 ## Build (macOS con Xcode 26+)
@@ -81,7 +60,7 @@ Spedizioni/
 brew install xcodegen
 cd Spedizioni
 xcodegen generate
-xcodebuild -project Spedizioni.xcodeproj -scheme Spedizioni \
+xcodebuild -project CreaSito.xcodeproj -scheme CreaSito \
   -configuration Release -destination 'generic/platform=iOS' \
   CODE_SIGNING_ALLOWED=NO build
 ```
@@ -90,7 +69,6 @@ Requisiti: **iOS 26.0+** (API Liquid Glass), Xcode 26+.
 
 ## Note
 
-- I dati restano sul dispositivo (JSON in Application Support).
-- Il tracciamento apre il sito della rete scelta; per reti senza
-  URL diretto si usa 17Track (2000+ reti supportate).
-- Nessuna affiliazione con le aziende di trasporto citate.
+- I dati (file del sito) restano sul dispositivo in `Documents/Sito`.
+- Il token Vercel non lascia mai il Keychain.
+- Nessuna affiliazione con Vercel; il piano Hobby è gratuito.

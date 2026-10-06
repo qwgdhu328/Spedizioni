@@ -1,4 +1,4 @@
-name: iOS build (Spedizioni)
+name: iOS build (CreaSito)
 
 on:
   workflow_dispatch:
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   build:
-    name: Build Liquid Glass (iOS 26)
+    name: Build CreaSito (iOS 26)
     runs-on: macos-latest
     timeout-minutes: 45
 
@@ -38,8 +38,8 @@ jobs:
         run: |
           set -o pipefail
           xcodebuild \
-            -project Spedizioni.xcodeproj \
-            -scheme Spedizioni \
+            -project CreaSito.xcodeproj \
+            -scheme CreaSito \
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -derivedDataPath build \
@@ -50,10 +50,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p out/Payload
-          cp -R "build/Build/Products/Release-iphoneos/Spedizioni.app" "out/Payload/"
+          cp -R "build/Build/Products/Release-iphoneos/CreaSito.app" "out/Payload/"
           cd out
-          ditto -c -k --keepParent Payload "Spedizioni-unsigned.ipa"
-          echo "IPA: $(stat -f%z Spedizioni-unsigned.ipa) bytes"
+          ditto -c -k --keepParent Payload "CreaSito-unsigned.ipa"
+          echo "IPA: $(stat -f%z CreaSito-unsigned.ipa) bytes"
 
       - name: Upload build log on failure
         if: failure()
@@ -69,6 +69,6 @@ jobs:
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Spedizioni-unsigned-ipa
-          path: out/Spedizioni-unsigned.ipa
+          name: CreaSito-unsigned-ipa
+          path: out/CreaSito-unsigned.ipa
           retention-days: 14

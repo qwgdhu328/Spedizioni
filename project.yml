@@ -1,4 +1,4 @@
-name: Spedizioni
+name: CreaSito
 options:
   bundleIdPrefix: com.spedizioni
   deploymentTarget:
@@ -14,20 +14,20 @@ settings:
     DEVELOPMENT_TEAM: ""
 
 targets:
-  Spedizioni:
+  CreaSito:
     type: application
     platform: iOS
     sources:
       - Sources
     settings:
       base:
-        PRODUCT_NAME: "Spedizioni"
-        PRODUCT_BUNDLE_IDENTIFIER: com.spedizioni.tracker
+        PRODUCT_NAME: "CreaSito"
+        PRODUCT_BUNDLE_IDENTIFIER: com.spedizioni.creasito
         INFOPLIST_FILE: Resources/Info.plist
         GENERATE_INFOPLIST_FILE: NO
 
 schemes:
-  Spedizioni:
+  CreaSito:
     build:
       targets:
-        Spedizioni: all
+        CreaSito: all
