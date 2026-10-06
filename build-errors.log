@@ -1,5 +1,0 @@
-### Errore build CI — run 37538011324, sha 3e4b52749d55228fdcc4ee1aaa195ad51899af38
-
-```
-/Users/runner/work/Spedizioni/Spedizioni/Sources/Services/SiteStore.swift:80:13: error: 'guard' body must not fall through, consider using a 'return' or 'throw' to exit the scope
-```
