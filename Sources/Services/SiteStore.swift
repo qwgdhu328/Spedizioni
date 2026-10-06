@@ -75,7 +75,7 @@ final class SiteStore: ObservableObject {
     private func bootstrap() {
         do {
             try fm.createDirectory(at: root, withIntermediateDirectories: true)
-            guard !(try fm.contentsOfDirectory(atPath: root.path)).isEmpty else {
+            if (try fm.contentsOfDirectory(atPath: root.path)).isEmpty {
                 try createInitialTemplate()
             }
         } catch {
