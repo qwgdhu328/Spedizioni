@@ -12,3 +12,7 @@ xcuserdata/
 # Swift Package Manager
 .build/
 .swiftpm/
+
+# Test C++ locale di FavOS
+FavOS/tests_cpp/*.exe
+FavOS/tests_cpp/test_host

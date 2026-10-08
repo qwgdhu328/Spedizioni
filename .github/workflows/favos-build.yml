@@ -1,0 +1,37 @@
+name: FavOS build (Swift)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - "FavOS/**"
+      - ".github/workflows/favos-build.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: swift test (macOS)
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Swift version
+        run: swift --version
+
+      - name: Build + test (swift test)
+        working-directory: FavOS
+        run: |
+          set -o pipefail
+          swift test 2>&1 | tail -n 120
+
+      - name: Build release
+        working-directory: FavOS
+        run: |
+          set -o pipefail
+          swift build -c release 2>&1 | tail -n 40

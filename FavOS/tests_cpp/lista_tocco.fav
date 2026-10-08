@@ -1,0 +1,12 @@
+# lista_tocco.fav — verifica del wrapper Swift: os_tocco ritorna una lista
+# e testo_unisci riceve una lista come argomento.
+
+t = os_tocco()
+se t != niente
+    stampa("tocco " + num_testo(t[0]) + "," + num_testo(t[1]))
+fine
+
+l = [10, 20]
+stampa("lista: " + num_testo(lista_lunghezza(l)))
+stampa(testo_unisci(["ciao", "mondo"], "-"))
+stampa("fine")
