@@ -420,8 +420,10 @@ public final class Kernel {
     /// Tocco sulla home: lancia l'app della cella toccata.
     private func toccoCellHome(_ x: Int, _ y: Int) {
         let nomi = nomiHome
-        for (i, c) in Kernel.homeCelle.enumerated()
-        where x >= c.x, x < c.x + c.w, y >= c.y, y < c.y + c.h {
+        for (i, c) in Kernel.homeCelle.enumerated() {
+            guard x >= c.x, x < c.x + c.w, y >= c.y, y < c.y + c.h else {
+                continue
+            }
             if i < nomi.count {
                 scrivi("> " + nomi[i])
                 avviaDaTocco(nomi[i])
