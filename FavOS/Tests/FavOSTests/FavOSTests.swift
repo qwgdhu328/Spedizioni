@@ -158,8 +158,9 @@ final class FavOSTests: XCTestCase {
         // riga di navigazione: barra (28, 30, 40)
         let nav = Kernel.rigaNavY * Kernel.larghezza + 10
         XCTAssertEqual(fb.pixel[nav], 0x1C1E28)
-        // tastiera a schermo: barra
-        let tasti = Kernel.tastiY * Kernel.larghezza + 10
+        // tastiera a schermo: la barra resta visibile nello spazio
+        // fra la prima fila (y 192..206) e la seconda (che inizia x=16)
+        let tasti = 206 * Kernel.larghezza + 5
         XCTAssertEqual(fb.pixel[tasti], 0x1C1E28)
         // l'immagine CGImage si crea
         XCTAssertNotNil(fb.cgImage())
