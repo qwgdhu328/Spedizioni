@@ -13,6 +13,11 @@ settings:
     CODE_SIGN_STYLE: Automatic
     DEVELOPMENT_TEAM: ""
 
+packages:
+  # package Swift locale: il wrapper di FavOS (VM Favilla + kernel + UI)
+  FavOS:
+    path: FavOS
+
 targets:
   CreaSito:
     type: application
@@ -26,8 +31,30 @@ targets:
         INFOPLIST_FILE: Resources/Info.plist
         GENERATE_INFOPLIST_FILE: NO
 
+  # App che fa girare FavOS: shell SwiftUI minima sul package FavOS.
+  # Il nome del target NON deve essere "FavOS" (il modulo del package
+  # si chiamerebbe FavOS e `import FavOS` diventerebbe ambiguo).
+  FavOSApp:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - FavOSApp
+    dependencies:
+      - package: FavOS
+    settings:
+      base:
+        PRODUCT_NAME: "FavOSApp"
+        PRODUCT_BUNDLE_IDENTIFIER: com.spedizioni.favos
+        INFOPLIST_FILE: FavOSApp/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+
 schemes:
   CreaSito:
     build:
       targets:
         CreaSito: all
+  FavOSApp:
+    build:
+      targets:
+        FavOSApp: all

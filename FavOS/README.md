@@ -63,6 +63,24 @@ FavOSSchermo(sessione: sessione)
   permesso, e con il permesso `rete` restituiscono `WEBERRORE:...`
   (nessuna richiesta di rete nel wrapper).
 
+## Build dell'app iOS (IPA)
+
+La shell dell'app vive in `../FavOSApp/` (`FavOSApp.swift` +
+`Info.plist`) ed è collegata a questo package dal target `FavOSApp` di
+`../project.yml` (`packages: FavOS: path: FavOS`, iOS 17). La GitHub
+Action `favos-build.yml` fa, su macOS:
+
+```sh
+xcodegen generate                         # -> CreaSito.xcodeproj
+xcodebuild -project CreaSito.xcodeproj -scheme FavOSApp \
+  -configuration Release -destination 'generic/platform=iOS' \
+  -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+# Payload/FavOSApp.app -> FavOS-unsigned.ipa (artifact della run)
+```
+
+L'IPA è **unsigned**: per installarlo va firmato (AltStore, Sideloadly,
+TestFlight o un profilo proprio).
+
 ## Test
 
 ```sh

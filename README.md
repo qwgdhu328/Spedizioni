@@ -40,8 +40,9 @@ Spedizioni/
 ├── project.yml                     # XcodeGen → CreaSito, iOS 26.0
 ├── Resources/Info.plist
 ├── .github/workflows/ios-build.yml # build + IPA unsigned
-├── .github/workflows/favos-build.yml # build + test del package FavOS
+├── .github/workflows/favos-build.yml # build + IPA unsigned di FavOS
 ├── FavOS/                          # wrapper Swift di FavOS (Swift Package)
+├── FavOSApp/                       # shell iOS che mostra FavOSSchermo
 └── Sources/
     ├── App/CreaSitoApp.swift       # entry point
     ├── Services/
@@ -73,8 +74,13 @@ Requisiti: **iOS 26.0+** (API Liquid Glass), Xcode 26+.
 
 `FavOS/` contiene il **wrapper Swift di FavOS**: una Swift Package che
 incapsula la VM Favilla C++ (`favos_vm.h`), riscrive kernel e viste in
-Swift e mostra il framebuffer 320x240 in SwiftUI. Build e test girano
-nella GitHub Action `favos-build.yml` (macOS, `swift test`). Vedi
+Swift e mostra il framebuffer 320x240 in SwiftUI. `FavOSApp/` è la
+shell iOS (`@main`) che monta `FavOSSchermo` a schermo intero, collegata
+come package locale dal target `FavOSApp` di `project.yml`.
+
+La GitHub Action `favos-build.yml` (macOS + Xcode) genera il progetto
+con XcodeGen, compila l'app e **pubblica l'IPA unsigned come artifact**
+(`FavOS-unsigned-ipa`); i test restano locali con `swift test`. Vedi
 `FavOS/README.md` per i dettagli.
 
 ## Note
